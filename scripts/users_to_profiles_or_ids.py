@@ -1,3 +1,8 @@
+# cleans data from steam_groups_spider.py
+# splits found users into 2 categories:
+# 1. users with profile numbers we can use right away
+# 2. users with vanity urls we have to process
+
 import json
 
 max_profiles = 10000
@@ -19,12 +24,12 @@ with open("users.json") as f:
             continue
         url = json_line['href']
         if 'http://steamcommunity.com/id/' in url:
-            current_vanityurl+=1
+            current_vanityurl += 1
             if current_vanityurl >= max_vanityurls:
                 print("current_vanityurl_file", current_vanityurl_file)
                 current_vanityurl = 0
                 current_vanityurl_file += 1
-            with open("ids"+str(current_vanityurl_file)+ ".txt", 'a') as f2:
+            with open("vanity_urls"+str(current_vanityurl_file) + ".txt", 'a') as f2:
                 string = url.partition("http://steamcommunity.com/id/")[2] + "\n"
                 f2.write(string)
         if 'http://steamcommunity.com/profiles/' in url:

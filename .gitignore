@@ -1,3 +1,6 @@
+# private variables (i.e. steam api key)
+scripts/private_variables.txt
+
 # scraped & wip data
 scripts/wip_data/
 

@@ -1,12 +1,21 @@
 import pandas as pd
 import json
 
-in_file = "profiles0_scraped.txt"
+in_file = "profiles0_scraped.txt"       # users' libraries scraped with scrap_from_profiles.py
 
 df = pd.DataFrame()
 chunk = pd.DataFrame()
-chunk_size = 1000
+chunk_size = 1000  # dividing data into chunks before concatenating into final dataframe works better
 i = 0
+
+def concatenate_df(_chunk):
+    print("contatenating dataframe...")
+    global df
+    df = pd.concat([df, _chunk])
+    global chunk
+    chunk = pd.DataFrame()
+    print("dataframe concatenated, shape:", df.shape)
+
 
 with open(in_file) as f:
     for line in f.readlines():
@@ -17,7 +26,7 @@ with open(in_file) as f:
             print("json error")
             continue
 
-        user = {'profile': json_line['profile']}
+        user = {'profile': json_line['profile']}        # 'profile' column is unnecessary? it's in index anyway
 
         for game in json_line['games']:
             user["appid" + str(game['appid'])] = 1
@@ -25,15 +34,12 @@ with open(in_file) as f:
         user_df = pd.DataFrame(user, index=[user['profile']])
         chunk = pd.concat([chunk, user_df])
 
-        # series = pd.Series(user.values(), user.keys())
-        # chunk = pd.concat([chunk, series])
-
         print(i)
         i += 1
         if i >= chunk_size:
-            df = pd.concat([df, chunk])
-            chunk = pd.DataFrame()
+            concatenate_df(chunk)
             i = 0
 
-    df = pd.concat([df, chunk])
+    concatenate_df(chunk)
+    print("saving csv")
     df.to_csv(in_file.strip(".txt") + "_csv.csv")
