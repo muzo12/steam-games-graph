@@ -1,1 +1,4 @@
+# create a private_variables.txt file and store your variables there
+
+# http://steamcommunity.com/dev/apikey
 steam_api_key=xxx
