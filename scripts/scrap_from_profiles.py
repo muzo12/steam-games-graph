@@ -34,8 +34,8 @@ def send_api_requests(profiles):
             i += 1
             continue
 
-        print(i, line, "scraping", json_response)
-        user = {'time': time.time(), 'profile': line, 'games': json_response['response']['games']}
+        print(i, profile, "scraping", json_response)
+        user = {'time': time.time(), 'profile': profile, 'games': json_response['response']['games']}
 
         users_scraped.append(user)
 
