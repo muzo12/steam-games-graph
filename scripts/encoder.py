@@ -3,6 +3,7 @@ from io import StringIO
 
 class Encoder:
     BASE66_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~"
+    BASE11_ALPHABET = "0123456789a"
     BASE = len(BASE66_ALPHABET)
 
     def __init__(self,
