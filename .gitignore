@@ -1,3 +1,6 @@
+# PyCharm settings
+.idea/
+
 # private variables (i.e. steam api key)
 scripts/private_variables.txt
 

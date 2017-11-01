@@ -10,8 +10,8 @@ class ProfileScrapper():
     format = "%y%m%d%H%M"
 
     def __init__(self,
-                 json_master_path = "C:\\Users\\Admin\\Documents\\GitHub\\GamesGraph\\scripts\\wip_data\\users_master.json",
-                 private_variables_path = "C:\\Users\\Admin\\Documents\\GitHub\\GamesGraph\\scripts\\private_variables.txt",
+                 json_master_path = "/wip_data/users_master.json",
+                 private_variables_path = "/private_variables.txt",
                  daily_limit=99000,
                  verbose=1):
 
