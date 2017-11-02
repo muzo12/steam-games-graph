@@ -43,6 +43,8 @@ class GraphBuilder:
         if self.matrix is not None:
             return self.matrix, self.indices
 
+        log('Building adjacency matrix...')
+
         with open(self.json_master_path) as f:
             json_users = json.load(f)
 
@@ -92,6 +94,8 @@ class GraphBuilder:
             indices = self.indices
         else:
             mtx, indices = self.get_adjacency_matrix(**kwargs)
+
+        log('Filtering adjacency matrix...')
 
         # discard self-adjacency for better mean and std calculation
         mtx *= (np.ones(mtx.shape) - np.identity(mtx.shape[0]))
@@ -150,8 +154,10 @@ class GraphBuilder:
             min_neighbours=min_neighbours,
             **kwargs)
 
+        log('Building graph...')
+
         nonzero = np.count_nonzero(mtx, axis=1)
-        log('non-zero elements in masked_adjacency matrix: '
+        log('Non-zero elements in filtered adjacency matrix: '
             'median: {}, mean: {:.3f}, std: {:.3f}'.format(
              np.median(nonzero), np.mean(nonzero), np.std(nonzero)))
 
@@ -215,6 +221,8 @@ class GraphBuilder:
         :return: (users_dict, games_dict) tuple.
         """
 
+        log('Building users_dict & games_dict...')
+
         users_dict = {}
         games_dict = {}
 
@@ -239,7 +247,7 @@ class GraphBuilder:
                 except KeyError:
                     games_dict[game] = set(user_name)
 
-            # if i > 5000:
+            # if i > 100000:
             #     log('breaking building dicts after {} users'.format(i))
             #     break
 
@@ -275,25 +283,16 @@ class GraphBuilder:
         :return: trimmed games_dict.
         """
 
+        log('Trimming games dict...')
+
         min_users = kwargs.pop('trim_min_users', 25)
         optimal_users = kwargs.pop('trim_optimal_users', 100)
         optimal_number_of_games = kwargs.pop(
             'trim_optimal_number_of_games_per_user', 20)
 
-        def user_score(user_id, optimal_number=20):
-            """Returns inverted distance from optimal_number_of_games.
-            
-            :param user_id: user id of queried user
-            :type user_id: int
-            :param optimal_number: number of games considered optimal
-                for an user to have.
-            :type optimal_number: int"""
-            return 0 - abs(optimal_number - len(users_dict[user_id]))
-
         trimmed_games_dict = games_dict.copy()
 
         saved_users = set()
-
         games = games_dict.keys()
         for game in games:
             game_users = trimmed_games_dict[game]
@@ -309,16 +308,22 @@ class GraphBuilder:
 
             fresh_users = set(game_users) - saved_users
             users_to_add = optimal_users - len(set(game_users) & saved_users)
+
+            if users_to_add <= 0:
+                continue
+
             sorted_users = sorted(
                 list(fresh_users),
-                key=lambda user: user_score(user, optimal_number_of_games),
+                key=lambda user: 0 - abs(optimal_number_of_games -
+                                         len(users_dict[user])),
                 reverse=True)
             saved_users |= set(sorted_users[:users_to_add])
-
             trimmed_games_dict[game] = list(set(game_users) & saved_users)
 
-        log('_trim_games_dict: total users remaining:', len(saved_users))
-        log('games remaining after trim:', len(trimmed_games_dict))
+        log('Trimmed games_dict: Total users remaining:',
+            len(saved_users))
+        log('Trimmed games_dict: Total games remaining:',
+            len(trimmed_games_dict))
 
         return trimmed_games_dict
 
@@ -331,6 +336,9 @@ class GraphBuilder:
         :param games_dict: Trimmed games_dict.
         :return: (dict, games_list) tuple.
         """
+
+        log('Building bool game:users ndarray...')
+
         users_set = set()
         for game_users in games_dict.values():
             users_set |= set(game_users)
@@ -369,7 +377,10 @@ class GraphBuilder:
 
 
 if __name__ == '__main__':
-    gb = GraphBuilder(json_master_path="/test_users_master.json")
-    kwargs = {'trim_min_users': 25, 'trim_optimal_users': 150}
+    gb = GraphBuilder()
+    # gb = GraphBuilder(json_master_path="/test_users_master.json")
+    kwargs = {'trim_min_users': 50,
+              'trim_optimal_users': 150,
+              'trim_optimal_number_of_games_per_user': 25}
     gb.get_graph(**kwargs)
     gb.plot_info()
