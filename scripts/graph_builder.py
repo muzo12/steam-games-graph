@@ -290,42 +290,55 @@ class GraphBuilder:
         optimal_number_of_games = kwargs.pop(
             'trim_optimal_number_of_games_per_user', 20)
 
-        trimmed_games_dict = games_dict.copy()
-
         saved_users = set()
         games = games_dict.keys()
         for game in games:
-            game_users = trimmed_games_dict[game]
-            if len(game_users) < min_users:
-                del trimmed_games_dict[game]
-            elif len(game_users) < optimal_users:
+            game_users = games_dict[game]
+            if min_users <= len(game_users) < optimal_users:
                 saved_users |= set(game_users)
+        #
+        # log('saved users: {}'.format(len(saved_users)))
 
-        for game, game_users in trimmed_games_dict.items():
+        result_dict = {}
+
+        for game in games_dict.keys():
+
+            game_users = games_dict[game]
+
+            if len(game_users) < min_users:
+                continue
 
             if len(game_users) < optimal_users:
+                result_dict[game] = game_users
                 continue
 
             fresh_users = set(game_users) - saved_users
             users_to_add = optimal_users - len(set(game_users) & saved_users)
 
-            if users_to_add <= 0:
-                continue
+            if users_to_add > 0:
+                sorted_users = sorted(
+                    list(fresh_users),
+                    key=lambda user: 0 - abs(optimal_number_of_games -
+                                             len(users_dict[user])),
+                    reverse=True)
+                saved_users |= set(sorted_users[:users_to_add])
 
-            sorted_users = sorted(
-                list(fresh_users),
-                key=lambda user: 0 - abs(optimal_number_of_games -
-                                         len(users_dict[user])),
-                reverse=True)
-            saved_users |= set(sorted_users[:users_to_add])
-            trimmed_games_dict[game] = list(set(game_users) & saved_users)
+            result_dict[game] = list(set(game_users) & saved_users)
+
+        # trimmed_games_dict = result_dict
 
         log('Trimmed games_dict: Total users remaining:',
             len(saved_users))
         log('Trimmed games_dict: Total games remaining:',
-            len(trimmed_games_dict))
+            len(result_dict))
 
-        return trimmed_games_dict
+        check = set()
+        for users in result_dict.values():
+            check |= set(users)
+        assert len(check) == len(saved_users)
+        # log('CHECK: ', len(check))
+
+        return result_dict
 
     @staticmethod
     def _build_bool_ndarray(games_dict: dict) -> tuple:
@@ -343,12 +356,11 @@ class GraphBuilder:
         for game_users in games_dict.values():
             users_set |= set(game_users)
 
-        users_list = list(users_set)
         arrays = []
         games = []
         for game, game_users in games_dict.items():
             games.append(game)
-            arr = np.isin(users_list, game_users)
+            arr = np.isin(list(users_set), game_users)
             arrays.append(arr)
 
         return np.asarray(arrays), games
@@ -382,5 +394,8 @@ if __name__ == '__main__':
     kwargs = {'trim_min_users': 50,
               'trim_optimal_users': 150,
               'trim_optimal_number_of_games_per_user': 25}
-    gb.get_graph(**kwargs)
+    G = gb.get_graph(std_coefficient=4, **kwargs)
+    G_path = "wip_data/master_graph.gml"
+    nx.write_gml(G, G_path)
+    log('Saved graph to ' + G_path)
     gb.plot_info()
