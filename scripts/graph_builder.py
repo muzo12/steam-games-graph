@@ -5,6 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import pairwise_distances
 from scripts import Encoder, log
+import scripts
 
 
 class GraphBuilder:
@@ -363,6 +364,8 @@ class GraphBuilder:
             arr = np.isin(list(users_set), game_users)
             arrays.append(arr)
 
+        log('Building bool game:users ndarray... Complete')
+
         return np.asarray(arrays), games
 
     @staticmethod
@@ -392,10 +395,23 @@ if __name__ == '__main__':
     gb = GraphBuilder()
     # gb = GraphBuilder(json_master_path="/test_users_master.json")
     kwargs = {'trim_min_users': 50,
-              'trim_optimal_users': 150,
-              'trim_optimal_number_of_games_per_user': 25}
-    G = gb.get_graph(std_coefficient=4, **kwargs)
+              'trim_optimal_users': 80,
+              'trim_optimal_number_of_games_per_user': 40}
+    G = gb.get_graph(std_coefficient=7, **kwargs)
     G_path = "wip_data/master_graph.gml"
     nx.write_gml(G, G_path)
     log('Saved graph to ' + G_path)
+
     gb.plot_info()
+
+    gunn = scripts.GraphUtilsNodeName()
+    gunn.get_names()
+    gunn.write_graph()
+
+    gunc = scripts.GraphUtilsNodeColor()
+    gunc.colorize()
+    gunc.write_graph()
+
+    guns = scripts.GraphUtilsNodeSize()
+    guns.calculate_sizes()
+    guns.write_graph()
