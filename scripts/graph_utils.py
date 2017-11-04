@@ -21,6 +21,8 @@ class GraphUtils:
         self.graph = self.read_graph()
         self.users_master_json_path = users_master_json_path
 
+        self.raw_weights = None
+
     def read_graph(self) -> nx.Graph:
         """Reads graph to disc and returns it."""
         G = nx.read_gml(self.graph_path)
@@ -43,7 +45,7 @@ class GraphUtils:
             (Weight is number of game owners.)
         """
 
-        def get_raw_weights(parent):
+        def get_raw_weights():
             """Reads users_master.json file and returns weights of all games
             (number of users who have the game.)"""
 
@@ -95,18 +97,19 @@ class GraphUtils:
                 log("Sizes not normalized")
                 return sizes
 
-            keys, values = sizes.items()
+            keys = list(sizes.keys())
+            values = list(sizes.values())
             sizes_min = np.min(values)
             sizes_max = np.max(values)
             values_scaled = [min_val +
                              (x - sizes_min) * (max_val - min_val)/
                              (sizes_max - sizes_min) for x in values]
-            return dict(zip(keys,values_scaled))
+            return dict(zip(keys, values_scaled))
 
         log("Calculating games weights...")
 
         sizes = {}
-        for key, value in get_raw_weights(self).items():
+        for key, value in get_raw_weights().items():
             sizes[key] = func(value)
 
         graph_node_sizes = {}
@@ -124,7 +127,7 @@ class GraphUtils:
             min_value,
             max_value)
 
-        nx.set_node_attributes(self.graph, 'size', graph_node_sizes)
+        nx.set_node_attributes(self.graph, sizes_normalized, 'size')
 
         log("Calculating games weights... Complete")
 
@@ -165,13 +168,12 @@ class GraphUtils:
                 name = str(node)
             names_dict[node] = name
 
-        nx.set_node_attributes(self.graph, 'name', names_dict)
+        nx.set_node_attributes(self.graph, names_dict, 'name')
 
         log("Querying Steam to get app names... Complete")
 
     def set_node_colors(self,
-                 method='tsne_3d',
-                 save_label='color'):
+                 method='tsne_3d'):
         """Colorizes graph based on given method, and stores result in
         given label within the graph.
 
@@ -183,7 +185,7 @@ class GraphUtils:
         log("Colorizing game nodes...")
 
         def normalize_to_color_space(
-                pos,
+                pos: np.ndarray,
                 min_val=0.25,
                 max_val=0.9,
                 loss = 0.1) -> np.ndarray:
@@ -266,7 +268,7 @@ class GraphUtils:
             hex_values = self._to_hex(normalized)
             hex_values_dict = dict(zip(list(self.graph.nodes()), hex_values))
 
-            nx.set_node_attributes(self.graph, hex_values_dict, save_label)
+            nx.set_node_attributes(self.graph, hex_values_dict, 'color')
 
         log("Colorizing game nodes... Complete")
 
@@ -283,9 +285,12 @@ class GraphUtils:
             results.append(result)
         return results
 
+
 if __name__ == '__main__':
-    gu = GraphUtils()
+    gu = GraphUtils(
+        graph_path="test_master_graph.gml",
+        users_master_json_path="test_users_master.json")
+    gu.set_node_sizes()
     gu.set_node_colors(method='tsne_3d')
     gu.set_node_names()
-    gu.set_node_sizes()
     gu.write_graph()
