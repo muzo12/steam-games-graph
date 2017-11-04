@@ -392,8 +392,8 @@ class GraphBuilder:
 
 
 if __name__ == '__main__':
-    gb = GraphBuilder()
-    # gb = GraphBuilder(json_master_path="/test_users_master.json")
+    # gb = GraphBuilder()
+    gb = GraphBuilder(json_master_path="/test_users_master.json")
     kwargs = {'trim_min_users': 50,
               'trim_optimal_users': 80,
               'trim_optimal_number_of_games_per_user': 40}

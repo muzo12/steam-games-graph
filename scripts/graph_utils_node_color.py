@@ -105,7 +105,7 @@ class GraphUtilsNodeColor:
             hex_values = self._to_hex(normalized)
 
             hex_values_dict = dict(zip(list(self.graph.nodes()), hex_values))
-            nx.set_node_attributes(self.graph, save_label, hex_values_dict)
+            nx.set_node_attributes(self.graph, hex_values_dict, save_label)
 
         log("Colorizing game nodes... Complete")
 
@@ -124,5 +124,5 @@ class GraphUtilsNodeColor:
 
 if __name__ == '__main__':
     gunc = GraphUtilsNodeColor()
-    gunc.colorize(method='tsne_3d')
-    gunc.write_graph()
+    gunc.colorize(method='pca_3d')
+    # gunc.write_graph()
