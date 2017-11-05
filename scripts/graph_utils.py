@@ -116,7 +116,7 @@ class GraphUtils:
         for node in self.graph.nodes():
             try:
                 # log(node, sizes[node])
-                graph_node_sizes[node] = sizes[node]
+                graph_node_sizes[node] = sizes[int(node)]
             except KeyError:
                 log("Node {} not found in users_master.json file!"
                     .format(node))
@@ -131,11 +131,11 @@ class GraphUtils:
 
         log("Calculating games weights... Complete")
 
-        return sizes
-
     def set_node_names(self):
         """Queries Steam's API to gather names for games present in the graph.
         """
+
+        # TODO offline json backup
 
         log("Querying Steam to get app names...")
 
@@ -162,7 +162,7 @@ class GraphUtils:
         names_dict = {}
         for node in self.graph.nodes():
             try:
-                name = apps[node]
+                name = apps[int(node)]
             except KeyError:
                 log("name not found for game: {}".format(node))
                 name = str(node)

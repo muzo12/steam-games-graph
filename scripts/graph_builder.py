@@ -392,26 +392,16 @@ class GraphBuilder:
 
 
 if __name__ == '__main__':
-    # gb = GraphBuilder()
-    gb = GraphBuilder(json_master_path="/test_users_master.json")
+
+    json_path = "test_users_master.json"
+    graph_path = "test_master_graph.gml"
+
+    gb = GraphBuilder(json_master_path=json_path)
     kwargs = {'trim_min_users': 50,
               'trim_optimal_users': 80,
               'trim_optimal_number_of_games_per_user': 40}
     G = gb.get_graph(std_coefficient=7, **kwargs)
-    G_path = "test_master_graph.gml"
-    nx.write_gml(G, G_path)
-    log('Saved graph to ' + G_path)
+    nx.write_gml(G, graph_path)
+    log('Saved graph to ' + graph_path)
 
     gb.plot_info()
-
-    # gunn = scripts.GraphUtilsNodeName()
-    # gunn.get_names()
-    # gunn.write_graph()
-    #
-    # gunc = scripts.GraphUtilsNodeColor()
-    # gunc.colorize()
-    # gunc.write_graph()
-    #
-    # guns = scripts.GraphUtilsNodeSize()
-    # guns.calculate_sizes()
-    # guns.write_graph()
