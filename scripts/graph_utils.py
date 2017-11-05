@@ -55,7 +55,7 @@ class GraphUtils:
             with open(self.users_master_json_path) as f:
                 json_users = json.load(f)
 
-            encoder = Encoder(Encoder.BASE11_ALPHABET)
+            encoder = Encoder()
 
             games_raw_weights = {}
 
@@ -71,7 +71,7 @@ class GraphUtils:
                     continue
 
                 try:
-                    games_arr = encoder.decode_user_games_alpha(games_alpha)
+                    games_arr = encoder.decode_games_string(games_alpha)
                 except AssertionError:
                     continue
 
@@ -178,7 +178,6 @@ class GraphUtils:
         given label within the graph.
 
         :param method:
-        :param save_label:
         :return:
         """
 

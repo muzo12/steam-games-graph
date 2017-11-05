@@ -5,7 +5,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import pairwise_distances
 from scripts import Encoder, log
-import scripts
 
 
 class GraphBuilder:
@@ -379,8 +378,7 @@ class GraphBuilder:
         if games_str == "" or games_str == "error":
             raise AssertionError
 
-        games_arr = Encoder(alphabet=Encoder.BASE11_ALPHABET
-                            ).decode_user_games_alpha(games_str)
+        games_arr = Encoder().decode_games_string(games_str)
         return games_arr
 
     @staticmethod

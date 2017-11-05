@@ -2,57 +2,47 @@ from io import StringIO
 
 
 class Encoder:
-    BASE66_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~"
-    BASE11_ALPHABET = "0123456789a"
-    BASE = len(BASE66_ALPHABET)
+    base66_alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~"
+    base11_alphabet = "0123456789a"
 
-    def __init__(self,
-                 alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~"):
-        self.alphabet = alphabet
-        self.base = len(alphabet)
+    def __init__(self):
+        pass
 
-    def encode(self, msg):
-
-        msg = self.alphabet[self.base - 1] + msg
+    @staticmethod
+    def translate(phrase,
+                  source_alphabet,
+                  target_alphabet) -> str:
 
         i = 0
+        source_base = len(source_alphabet)
+        target_base = len(target_alphabet)
 
-        for c in msg:
-            i = i * self.base + self.alphabet.index(c)
-
-        if i == 0:
-            return Encoder.BASE66_ALPHABET[0]
+        for c in phrase:
+            i *= source_base
+            i += source_alphabet.find(c)
 
         r = StringIO()
         while i:
-            i, t = divmod(i, Encoder.BASE)
-            r.write(Encoder.BASE66_ALPHABET[t])
+            i, t = divmod(i, target_base)
+            r.write(target_alphabet[t])
         return r.getvalue()[::-1]
-
-    def decode(self, alpha) -> str:
-        i = 0
-
-        for c in alpha:
-            i = i * Encoder.BASE + Encoder.BASE66_ALPHABET.index(c)
-
-        if i == 0:
-            return Encoder.BASE66_ALPHABET[0]
-
-        r = StringIO()
-        while i:
-            i, t = divmod(i, self.base)
-            r.write(self.alphabet[t])
-        return r.getvalue()[::-1][1:]
 
     def encode_games_array(self, arr):
         games_str = str(arr)
         games_str = games_str.lstrip('[')
         games_str = games_str.rstrip(']')
         games_str = games_str.replace(', ', 'a')
-        return self.encode(games_str)
+        games_str = self.base11_alphabet[len(self.base11_alphabet) - 1] + games_str
 
-    def decode_user_games_alpha(self, alpha):
-        string = self.decode(alpha)
+        alpha = self.translate(phrase=games_str,
+                               source_alphabet=self.base11_alphabet,
+                               target_alphabet=self.base66_alphabet)
+        return alpha
+
+    def decode_games_string(self, alpha):
+        string = self.translate(phrase=alpha,
+                                source_alphabet=self.base66_alphabet,
+                                target_alphabet=self.base11_alphabet)[1:]
         arr = string.split("a")
         int_arr = [int(x) for x in arr]
         return int_arr

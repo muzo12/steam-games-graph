@@ -19,6 +19,7 @@ class ProfileScrapper():
         self.json_master_path = os.path.dirname(__file__) + json_master_path
         self.last_bak_file = None
 
+        self.steam_api_key = ""
         with open(os.path.dirname(__file__) + private_variables_path) as var_f:
             for line in var_f.readlines():
                 if line[0] == '#': continue
@@ -32,7 +33,7 @@ class ProfileScrapper():
 
         self.daily_limit = daily_limit
 
-        encoder = Encoder(alphabet=Encoder.BASE11_ALPHABET)
+        encoder = Encoder()
         self.encoder = encoder
 
 

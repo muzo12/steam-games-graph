@@ -31,7 +31,7 @@ def send_api_requests(_appids_list):
 
         try:
             json_response = json.loads(response.text)
-        except JSONDecodeError:
+        except:
             print('error! id:', id)
             continue
 
