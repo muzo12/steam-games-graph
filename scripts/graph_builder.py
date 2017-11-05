@@ -22,8 +22,8 @@ class GraphBuilder:
     """
 
     def __init__(self,
-                 json_master_path="/wip_data/users_master.json"):
-        self.json_master_path = os.path.dirname(__file__) + json_master_path
+                 json_master_path="wip_data/users_master.json"):
+        self.json_master_path = json_master_path
         self.matrix = None
         self.filtered_matrix = None
         self.graph = None
